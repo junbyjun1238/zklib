@@ -131,6 +131,13 @@ theorem evenIndex_injective (domain : Radix2Domain F) (h : 0 < domain.logSize) :
   have hvals : ((i : Nat) + i) = ((j : Nat) + j) := congrArg Fin.val hij
   nlinarith
 
+theorem oddIndex_injective (domain : Radix2Domain F) (h : 0 < domain.logSize) :
+    Function.Injective (domain.oddIndex h) := by
+  intro i j hij
+  apply Fin.ext
+  have hvals : ((i : Nat) + (i + 1)) = ((j : Nat) + (j + 1)) := congrArg Fin.val hij
+  nlinarith
+
 theorem point_evenIndex (domain : Radix2Domain F) (h : 0 < domain.logSize)
     (i : Fin domain.halfSize) :
     domain.point (domain.evenIndex h i) = (domain.generator ^ 2) ^ (i : Nat) := by
