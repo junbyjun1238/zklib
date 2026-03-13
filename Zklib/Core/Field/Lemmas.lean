@@ -6,7 +6,7 @@ namespace Zklib.Core
 The first theorem boundary for field developments should exist before the full
 lemma set is proved.
 -/
-theorem PrimeFieldSpec.placeholder (spec : PrimeFieldSpec) : True := by
+theorem PrimeFieldOps.placeholder (spec : PrimeFieldOps) : True := by
   sorry
 
 end Zklib.Core

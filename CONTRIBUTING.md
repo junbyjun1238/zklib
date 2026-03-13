@@ -13,7 +13,8 @@
 
 This repository explicitly allows placeholder proofs with `by sorry` during early
 scaffolding. The goal is to stabilize module boundaries and statement shapes
-before we try to close every theorem.
+before we try to close every theorem. Those placeholders should stay behind
+explicit `Scaffold` imports rather than the default `import Zklib` surface.
 
 ## Suggested Shape
 

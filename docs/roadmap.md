@@ -14,15 +14,15 @@ Formalize reusable zk mathematics in Lean, then use that core to verify producti
 
 ### M1: algebraic core
 
-- prime-field interface
-- extension-field towers
+- prime-field operation signatures
+- extension-field skeletons and later towers
 - polynomial representation and evaluation
-- subgroup and root-of-unity lemmas
+- cyclic evaluation-domain and root-of-unity lemmas
 - NTT statement layer
 
 ### M2: verifier semantics
 
-- transcript interface
+- typed transcript interface with explicit serialization boundaries
 - constraint-system semantics
 - verifier-oriented statement definitions
 

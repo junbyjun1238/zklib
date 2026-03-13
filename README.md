@@ -6,6 +6,7 @@ The project is organized around two ideas:
 
 - Keep the long-lived algebraic core separate from protocol-specific choices.
 - Make room for real-world verifier targets without letting any single curve or proving system define the entire repository.
+- Keep placeholder theorem boundaries out of the default import surface.
 
 ## Layout
 
@@ -24,6 +25,7 @@ Zklib/
     ZkVM.lean
   Showcase/
     BN254OptimalAte.lean
+  Scaffold.lean
 docs/
   roadmap.md
 ```
@@ -34,9 +36,9 @@ docs/
 
 Stable algebraic infrastructure that should outlive any single proving system:
 
-- finite fields and extension fields
+- prime-field operation signatures and extension-field skeletons
 - polynomials, evaluation, and interpolation
-- subgroups, cosets, and roots of unity
+- cyclic generator-indexed evaluation domains and roots of unity
 - NTT correctness
 - transcript and constraint-system semantics
 
@@ -59,6 +61,12 @@ The first repository milestone is not the full BN254 pairing proof. The first mi
 
 See [docs/roadmap.md](docs/roadmap.md) for the initial sequence.
 
+## Import Surface
+
+- `import Zklib` brings in the stable core surface.
+- `import Zklib.Instantiations` and `import Zklib.Showcase` opt into protocol-facing and endgame targets.
+- `import Zklib.Scaffold` brings in placeholder theorem boundaries that may still use `by sorry`.
+
 ## Getting Started
 
 This repository expects a standard Lean 4 + `mathlib` workflow:
@@ -77,6 +85,7 @@ cache instead of recompiling the world from scratch.
 - keep proofs decomposed across small files and focused modules
 - prefer aggregator files that re-export topic-specific submodules
 - use `by sorry` to reserve theorem boundaries early, then tighten them gradually
+- keep `by sorry` out of the default `import Zklib` surface
 - avoid monolithic "everything about X" files
 
 ## License
