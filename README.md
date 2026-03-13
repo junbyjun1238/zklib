@@ -36,9 +36,9 @@ docs/
 
 Stable algebraic infrastructure that should outlive any single proving system:
 
-- prime-field operation signatures and extension-field skeletons
+- prime-field operation signatures, initial law layers, and extension-field skeletons
 - polynomials, evaluation, and interpolation
-- cyclic generator-indexed evaluation domains and roots of unity
+- cyclic evaluation domains, shifted cosets, and roots of unity
 - NTT correctness
 - transcript and constraint-system semantics
 
@@ -46,8 +46,8 @@ Stable algebraic infrastructure that should outlive any single proving system:
 
 Concrete verifier-facing targets that make the repository useful to current zk ecosystems:
 
-- `EIP4844`: KZG-oriented verifier specifications for Ethereum relevance
-- `ZkVM`: FRI/NTT/Merkle-oriented verifier specifications for the zkVM direction
+- `EIP4844`: setup-indexed KZG verifier boundaries for Ethereum relevance
+- `ZkVM`: verification-key and statement semantics for the zkVM direction
 
 ### `Zklib.Showcase`
 

@@ -1,28 +1,28 @@
-import Zklib.Core.Field.Basic
+import Zklib.Core.ExtensionField.Basic
 
 namespace Zklib.Core
 
-namespace PrimeFieldLaws
+namespace ExtensionFieldLaws
 
-theorem add_zero (spec : PrimeFieldLaws) (a : spec.Carrier) :
+theorem add_zero (spec : ExtensionFieldLaws) (a : spec.Carrier) :
     spec.add a spec.zero = a := by
   calc
     spec.add a spec.zero = spec.add spec.zero a := spec.add_comm a spec.zero
     _ = a := spec.zero_add a
 
-theorem add_right_neg (spec : PrimeFieldLaws) (a : spec.Carrier) :
+theorem add_right_neg (spec : ExtensionFieldLaws) (a : spec.Carrier) :
     spec.add a (spec.neg a) = spec.zero := by
   calc
     spec.add a (spec.neg a) = spec.add (spec.neg a) a := spec.add_comm a (spec.neg a)
     _ = spec.zero := spec.neg_add_cancel a
 
-theorem mul_one (spec : PrimeFieldLaws) (a : spec.Carrier) :
+theorem mul_one (spec : ExtensionFieldLaws) (a : spec.Carrier) :
     spec.mul a spec.one = a := by
   calc
     spec.mul a spec.one = spec.mul spec.one a := spec.mul_comm a spec.one
     _ = a := spec.one_mul a
 
-theorem right_distrib (spec : PrimeFieldLaws) (a b c : spec.Carrier) :
+theorem right_distrib (spec : ExtensionFieldLaws) (a b c : spec.Carrier) :
     spec.mul (spec.add a b) c = spec.add (spec.mul a c) (spec.mul b c) := by
   calc
     spec.mul (spec.add a b) c = spec.mul c (spec.add a b) := spec.mul_comm (spec.add a b) c
@@ -30,7 +30,7 @@ theorem right_distrib (spec : PrimeFieldLaws) (a b c : spec.Carrier) :
     _ = spec.add (spec.mul a c) (spec.mul b c) := by
       rw [spec.mul_comm c a, spec.mul_comm c b]
 
-theorem add_left_cancel (spec : PrimeFieldLaws) {a b c : spec.Carrier}
+theorem add_left_cancel (spec : ExtensionFieldLaws) {a b c : spec.Carrier}
     (h : spec.add a b = spec.add a c) : b = c := by
   calc
     b = spec.add spec.zero b := by symm; exact spec.zero_add b
@@ -41,7 +41,7 @@ theorem add_left_cancel (spec : PrimeFieldLaws) {a b c : spec.Carrier}
     _ = spec.add spec.zero c := by rw [spec.neg_add_cancel a]
     _ = c := spec.zero_add c
 
-theorem add_right_cancel (spec : PrimeFieldLaws) {a b c : spec.Carrier}
+theorem add_right_cancel (spec : ExtensionFieldLaws) {a b c : spec.Carrier}
     (h : spec.add b a = spec.add c a) : b = c := by
   apply spec.add_left_cancel
   calc
@@ -49,6 +49,6 @@ theorem add_right_cancel (spec : PrimeFieldLaws) {a b c : spec.Carrier}
     _ = spec.add c a := h
     _ = spec.add a c := spec.add_comm c a
 
-end PrimeFieldLaws
+end ExtensionFieldLaws
 
 end Zklib.Core

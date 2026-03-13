@@ -14,10 +14,10 @@ Formalize reusable zk mathematics in Lean, then use that core to verify producti
 
 ### M1: algebraic core
 
-- prime-field operation signatures
+- prime-field operation signatures and derived law lemmas
 - extension-field skeletons and later towers
 - polynomial representation and evaluation
-- cyclic evaluation-domain and root-of-unity lemmas
+- cyclic evaluation-domain, coset, and root-of-unity lemmas
 - NTT statement layer
 
 ### M2: verifier semantics
@@ -29,12 +29,13 @@ Formalize reusable zk mathematics in Lean, then use that core to verify producti
 ### M3: Ethereum-facing instantiation
 
 - EIP-4844 statement layer
-- KZG verifier specification boundaries
+- setup-indexed KZG verifier specification boundaries
 - clear separation between generic polynomial facts and commitment-specific assumptions
 
 ### M4: zkVM-facing instantiation
 
 - FRI-oriented statement layer
+- verification-key and statement-validity boundaries
 - Merkle/transcript integration points
 - receipt-verifier style decomposition
 

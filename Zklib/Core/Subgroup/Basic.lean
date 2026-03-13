@@ -39,4 +39,39 @@ def point (domain : EvaluationDomain F) (i : Fin domain.size) : F :=
 
 end EvaluationDomain
 
+/--
+A coset-shaped evaluation domain obtained by shifting a cyclic base domain.
+
+This records the next abstraction layer above `EvaluationDomain` without
+changing the existing NTT-facing interface: a base cyclic domain still provides
+the indexing and generator, while `shift` moves the points into a coset.
+-/
+structure CosetEvaluationDomain (F : Type*) [Monoid F] where
+  base : EvaluationDomain F
+  shift : F
+  shift_point_injective : Function.Injective (fun i : Fin base.size => shift * base.point i)
+
+namespace CosetEvaluationDomain
+
+variable {F : Type*} [Monoid F]
+
+/--
+The canonical enumeration of coset points by shifting the base-domain points.
+-/
+def point (domain : CosetEvaluationDomain F) (i : Fin domain.base.size) : F :=
+  domain.shift * domain.base.point i
+
+/--
+View a cyclic evaluation domain as the trivial coset shifted by `1`.
+-/
+def ofBase (base : EvaluationDomain F) : CosetEvaluationDomain F where
+  base := base
+  shift := 1
+  shift_point_injective := by
+    intro i j hij
+    apply base.generator_pow_injective
+    simpa [EvaluationDomain.point] using hij
+
+end CosetEvaluationDomain
+
 end Zklib.Core

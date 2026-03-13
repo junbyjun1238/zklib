@@ -17,6 +17,15 @@ structure ZerofierSpec (F : Type u) [Monoid F] [Zero F] where
   zerofier_vanishes :
     forall domain, toPolynomialSpec.vanishesOn (zerofier domain) domain
 
+/--
+A zerofier package for shifted coset domains.
+-/
+structure CosetZerofierSpec (F : Type u) [Monoid F] [Zero F] where
+  toPolynomialSpec : PolynomialSpec.{u, v} F
+  zerofier : CosetEvaluationDomain F -> toPolynomialSpec.Carrier
+  zerofier_vanishes :
+    forall domain, toPolynomialSpec.vanishesOnCoset (zerofier domain) domain
+
 namespace ZerofierSpec
 
 variable {F : Type u} [Monoid F] [Zero F]
@@ -34,5 +43,23 @@ theorem zerofier_evaluations_eq_zero (spec : ZerofierSpec F)
       (spec.zerofier domain) domain).mp (spec.zerofier_vanishes domain)
 
 end ZerofierSpec
+
+namespace CosetZerofierSpec
+
+variable {F : Type u} [Monoid F] [Zero F]
+
+theorem zerofier_eval_eq_zero (spec : CosetZerofierSpec F) (domain : CosetEvaluationDomain F)
+    (i : Fin domain.base.size) :
+    spec.toPolynomialSpec.eval (spec.zerofier domain) (domain.point i) = 0 := by
+  exact spec.zerofier_vanishes domain i
+
+theorem zerofier_evaluations_eq_zero (spec : CosetZerofierSpec F)
+    (domain : CosetEvaluationDomain F) :
+    spec.toPolynomialSpec.cosetEvaluations (spec.zerofier domain) domain = fun _ => 0 := by
+  exact
+    (PolynomialSpec.vanishesOnCoset_iff_cosetEvaluations_eq_zero spec.toPolynomialSpec
+      (spec.zerofier domain) domain).mp (spec.zerofier_vanishes domain)
+
+end CosetZerofierSpec
 
 end Zklib.Core

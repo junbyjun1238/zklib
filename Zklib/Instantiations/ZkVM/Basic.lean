@@ -5,13 +5,17 @@ zkVM-facing verifier boundary intended for FRI, Merkle, and receipt-style
 verification layers.
 
 This stays intentionally light, but it now exposes an explicit statement layer
-instead of treating receipt verification as an unstructured boolean boundary.
+and verification-key boundary instead of treating receipt verification as an
+unstructured boolean boundary.
 -/
 structure ZkVMVerifierSpec where
   Program : Type
+  VerificationKey : Type
   Receipt : Type
   Statement : Type
+  verificationKeyOf : Program -> VerificationKey
   statementOf : Program -> Receipt -> Statement
-  verify : Program -> Receipt -> Prop
+  statementValid : VerificationKey -> Statement -> Prop
+  verify : VerificationKey -> Receipt -> Prop
 
 end Zklib.Instantiations
