@@ -10,7 +10,7 @@ The project is organized around two ideas:
 
 ## Layout
 
-```
+```text
 Zklib/
   Core/
     Field.lean
@@ -36,11 +36,11 @@ docs/
 
 Stable algebraic infrastructure that should outlive any single proving system:
 
-- prime-field operation signatures, initial law layers, and extension-field skeletons
+- commutative-ring skeletons, extension-algebra skeletons, and bridges back to `mathlib`
 - polynomials, evaluation, and interpolation
 - cyclic evaluation domains, shifted cosets, and roots of unity
 - NTT correctness
-- transcript and constraint-system semantics
+- transcript and constraint-system semantics with explicit sequencing and input boundaries
 
 ### `Zklib.Instantiations`
 
@@ -72,13 +72,16 @@ See [docs/roadmap.md](docs/roadmap.md) for the initial sequence.
 This repository expects a standard Lean 4 + `mathlib` workflow:
 
 ```powershell
-lake update
 lake exe cache get
 lake build
 ```
 
 `lake exe cache get` is part of the normal setup here. We should lean on the `mathlib`
 cache instead of recompiling the world from scratch.
+
+Dependency revisions are pinned through `lake-manifest.json`. Use `lake update`
+only when intentionally refreshing those pins and committing the manifest
+change.
 
 ## Working Style
 

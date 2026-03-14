@@ -14,8 +14,8 @@ Formalize reusable zk mathematics in Lean, then use that core to verify producti
 
 ### M1: algebraic core
 
-- prime-field operation signatures and derived law lemmas
-- extension-field skeletons and later towers
+- commutative-ring skeletons and derived law lemmas
+- extension-algebra skeletons, bridges to `mathlib`, and later towers
 - polynomial representation and evaluation
 - cyclic evaluation-domain, coset, and root-of-unity lemmas
 - NTT statement layer
@@ -23,7 +23,7 @@ Formalize reusable zk mathematics in Lean, then use that core to verify producti
 ### M2: verifier semantics
 
 - typed transcript interface with explicit serialization boundaries
-- constraint-system semantics
+- constraint-system semantics with explicit public-input boundaries
 - verifier-oriented statement definitions
 
 ### M3: Ethereum-facing instantiation
