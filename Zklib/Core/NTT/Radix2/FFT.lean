@@ -22,11 +22,9 @@ noncomputable def fftAux :
   | 0, domain, hk, poly =>
       [domain.toNTTSpec.transform poly (Fin.mk 0 domain.size_pos)]
   | Nat.succ k, domain, hk, poly =>
-      let hpos : 0 < domain.logSize := by
-        simp [hk]
-      let half := domain.halfDomain hpos
+      let half := domain.succHalf hk
       let hkHalf : half.logSize = k := by
-        simp [half, Radix2Domain.halfDomain, hk]
+        simp [half]
       fftAux k half hkHalf poly ++
         fftAux k half hkHalf (domain.twistPolynomial poly)
 
@@ -45,10 +43,10 @@ theorem fftAux_zero (domain : Radix2Domain F) (hk : domain.logSize = 0)
 theorem fftAux_succ (k : Nat) (domain : Radix2Domain F)
     (hk : domain.logSize = k + 1) (poly : Polynomial F) :
     fftAux (k + 1) domain hk poly =
-      fftAux k (domain.halfDomain (by simp [hk]))
-        (by simp [Radix2Domain.halfDomain, hk]) poly ++
-      fftAux k (domain.halfDomain (by simp [hk]))
-        (by simp [Radix2Domain.halfDomain, hk]) (domain.twistPolynomial poly) := by
+      fftAux k (domain.succHalf hk)
+        (by simp) poly ++
+      fftAux k (domain.succHalf hk)
+        (by simp) (domain.twistPolynomial poly) := by
   rfl
 
 theorem length_fftAux :
@@ -64,9 +62,9 @@ theorem length_fftAux :
   | k + 1, domain, hk, poly => by
       let hpos : 0 < domain.logSize := by
         simp [hk]
-      let half := domain.halfDomain hpos
+      let half := domain.succHalf hk
       have hkHalf : half.logSize = k := by
-        simp [half, Radix2Domain.halfDomain, hk]
+        simp [half]
       calc
         (fftAux (k + 1) domain hk poly).length
             = (fftAux k half hkHalf poly).length +

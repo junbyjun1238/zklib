@@ -22,13 +22,12 @@ noncomputable def fftAux :
   | 0, domain, hk, poly =>
       [domain.toCosetNTTSpec.transform poly (Fin.mk 0 domain.base.size_pos)]
   | Nat.succ k, domain, hk, poly =>
-      let hpos : 0 < domain.base.logSize := by simp [hk]
-      let evenDom := domain.halfEvenDomain hpos
-      let oddDom := domain.halfOddDomain hpos
+      let evenDom := domain.succHalfEven hk
+      let oddDom := domain.succHalfOdd hk
       let hkHalf : evenDom.base.logSize = k := by
-        simp [evenDom, CosetRadix2Domain.halfEvenDomain, Radix2Domain.halfDomain, hk]
+        simp [evenDom]
       let hkHalfOdd : oddDom.base.logSize = k := by
-        simp [oddDom, CosetRadix2Domain.halfOddDomain, Radix2Domain.halfDomain, hk]
+        simp [oddDom]
       fftAux k evenDom hkHalf poly ++
         fftAux k oddDom hkHalfOdd poly
 
@@ -47,10 +46,10 @@ theorem fftAux_zero (domain : CosetRadix2Domain F) (hk : domain.base.logSize = 0
 theorem fftAux_succ (k : Nat) (domain : CosetRadix2Domain F)
     (hk : domain.base.logSize = k + 1) (poly : Polynomial F) :
     fftAux (k + 1) domain hk poly =
-      fftAux k (domain.halfEvenDomain (by simp [hk]))
-        (by simp [CosetRadix2Domain.halfEvenDomain, Radix2Domain.halfDomain, hk]) poly ++
-      fftAux k (domain.halfOddDomain (by simp [hk]))
-        (by simp [CosetRadix2Domain.halfOddDomain, Radix2Domain.halfDomain, hk]) poly := by
+      fftAux k (domain.succHalfEven hk)
+        (by simp) poly ++
+      fftAux k (domain.succHalfOdd hk)
+        (by simp) poly := by
   rfl
 
 theorem length_fftAux :
@@ -65,12 +64,12 @@ theorem length_fftAux :
       simp [fftAux, hsize]
   | k + 1, domain, hk, poly => by
       let hpos : 0 < domain.base.logSize := by simp [hk]
-      let evenDom := domain.halfEvenDomain hpos
-      let oddDom := domain.halfOddDomain hpos
+      let evenDom := domain.succHalfEven hk
+      let oddDom := domain.succHalfOdd hk
       have hkEven : evenDom.base.logSize = k := by
-        simp [evenDom, CosetRadix2Domain.halfEvenDomain, Radix2Domain.halfDomain, hk]
+        simp [evenDom]
       have hkOdd : oddDom.base.logSize = k := by
-        simp [oddDom, CosetRadix2Domain.halfOddDomain, Radix2Domain.halfDomain, hk]
+        simp [oddDom]
       calc
         (fftAux (k + 1) domain hk poly).length
             = (fftAux k evenDom hkEven poly).length +

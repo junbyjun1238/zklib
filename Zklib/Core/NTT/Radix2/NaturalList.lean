@@ -1,4 +1,5 @@
 import Zklib.Core.NTT.Radix2.Natural
+import Zklib.Core.NTT.Radix2.Representation
 
 namespace Zklib.Core
 
@@ -9,15 +10,15 @@ variable {F : Type*} [Field F]
 /--
 Interpret a length-indexed list as a table on `Fin n`.
 -/
-def tableOfList {n : Nat} (values : List F) (h : values.length = n) : Fin n -> F :=
-  fun i => values[i.1]'(by exact h.symm ▸ i.2)
+abbrev tableOfList {n : Nat} (values : List F) (h : values.length = n) : Fin n -> F :=
+  Radix2Representation.tableOfList values h
 
 omit [Field F] in
 @[simp]
 theorem tableOfList_ofFn {n : Nat} (f : Fin n -> F) :
     tableOfList (List.ofFn f) (List.length_ofFn (f := f)) = f := by
-  funext i
-  simp [tableOfList]
+  simpa [tableOfList, Radix2Representation.listOfTable] using
+    (Radix2Representation.tableOfList_listOfTable (values := f))
 
 /--
 Natural-order concatenation of lower and upper half-tables.
@@ -48,6 +49,13 @@ theorem combineNaturalOrderList_eq_ofFn (domain : Radix2Domain F) (h : 0 < domai
             rw [List.ofFn_congr (h := hsize) (f := Fin.append lower upper)]
     _ = List.ofFn (domain.combineNaturalOrder h lower upper) := by
           rfl
+
+theorem combineNaturalOrderList_eq_listOfTable (domain : Radix2Domain F) (h : 0 < domain.logSize)
+    (lower upper : Fin domain.halfSize -> F) :
+    domain.combineNaturalOrderList lower upper =
+      Radix2Representation.listOfTable (domain.combineNaturalOrder h lower upper) := by
+  simpa [Radix2Representation.listOfTable] using
+    domain.combineNaturalOrderList_eq_ofFn h lower upper
 
 /--
 One natural-order radix-2 butterfly stage assembled from recursive list outputs.
@@ -119,6 +127,21 @@ theorem butterflyStageList_eq_ofFn (domain : Radix2Domain F) (h : 0 < domain.log
         (fun i => domain.point (domain.lowerIndex h i))
         lower upper).2)
 
+theorem butterflyStageList_eq_listOfTable (domain : Radix2Domain F) (h : 0 < domain.logSize)
+    (lower upper : Fin domain.halfSize -> F) :
+    domain.butterflyStageList h
+      (List.ofFn lower) (List.ofFn upper)
+      (List.length_ofFn (f := lower)) (List.length_ofFn (f := upper)) =
+        Radix2Representation.listOfTable
+          (domain.combineNaturalOrder h
+            (Radix2.butterflyValues
+              (fun i => domain.point (domain.lowerIndex h i))
+              lower upper).1
+            (Radix2.butterflyValues
+              (fun i => domain.point (domain.lowerIndex h i))
+              lower upper).2) := by
+  simpa [Radix2Representation.listOfTable] using domain.butterflyStageList_eq_ofFn h lower upper
+
 /--
 List-based natural-order recursive radix-2 FFT carrying its output length.
 -/
@@ -137,9 +160,9 @@ noncomputable def fftNaturalListAuxData :
   | Nat.succ k, domain, hk, poly =>
       let hpos : 0 < domain.logSize := by
         simp [hk]
-      let half := domain.halfDomain hpos
+      let half := domain.succHalf hk
       let hkHalf : half.logSize = k := by
-        simp [half, Radix2Domain.halfDomain, hk]
+        simp [half]
       let evenValues := fftNaturalListAuxData k half hkHalf (PolynomialParity.evenPart poly)
       let oddValues := fftNaturalListAuxData k half hkHalf (PolynomialParity.oddPart poly)
       ⟨domain.butterflyStageList hpos

@@ -52,6 +52,19 @@ def halfSquareDomain (domain : CosetRadix2Domain F) (h : 0 < domain.base.logSize
       exact mul_left_cancel₀ hshiftSq hij
     exact (domain.base.halfDomain h).point_injective hpoint
 
+/--
+The canonical squared-shift child used in a successor-step coefficient
+recursion.
+-/
+def succHalfSquare (domain : CosetRadix2Domain F) {k : Nat}
+    (hk : domain.base.logSize = k + 1) : CosetRadix2Domain F :=
+  domain.halfSquareDomain (by simp [hk])
+
+@[simp] theorem succHalfSquare_logSize (domain : CosetRadix2Domain F) {k : Nat}
+    (hk : domain.base.logSize = k + 1) :
+    (domain.succHalfSquare hk).base.logSize = k := by
+  simp [succHalfSquare, CosetRadix2Domain.halfSquareDomain, Radix2Domain.halfDomain, hk]
+
 theorem point_lowerIndex_sq_eq_halfSquareDomain_point (domain : CosetRadix2Domain F)
     (h : 0 < domain.base.logSize) (i : Fin domain.base.halfSize) :
     domain.point (domain.base.lowerIndex h i) ^ 2 = (domain.halfSquareDomain h).point i := by

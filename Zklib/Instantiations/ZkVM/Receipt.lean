@@ -1,15 +1,8 @@
 import Zklib.Instantiations.ZkVM.Basic
 
-namespace Zklib.Instantiations
+/-!
+Re-export module for zkVM receipt soundness statements.
 
-/--
-Placeholder theorem boundary for zkVM receipt verification developments.
+The primary semantic contract now lives directly on `ZkVMVerifierSpec` in
+`Basic.lean`.
 -/
-theorem ZkVMVerifierSpec.placeholder
-    (spec : ZkVMVerifierSpec) :
-    ∀ program receipt,
-      spec.verify (spec.verificationKeyOf program) receipt ->
-        spec.statementValid (spec.verificationKeyOf program) (spec.statementOf program receipt) := by
-  sorry
-
-end Zklib.Instantiations

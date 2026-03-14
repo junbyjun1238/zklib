@@ -1,7 +1,7 @@
 import Mathlib.LinearAlgebra.Lagrange
 import Zklib.Core.Polynomial.Interpolation
 import Zklib.Core.Polynomial.Zerofier
-import Zklib.Core.Subgroup.Lemmas
+import Zklib.Core.EvaluationDomain.Lemmas
 
 noncomputable section
 
@@ -19,6 +19,48 @@ def mathlib (F : Type*) [Field F] : PolynomialSpec F where
   eval poly x := poly.eval x
 
 end PolynomialSpec
+
+namespace LagrangeFacts
+
+variable {F : Type*} [Field F]
+variable {ι : Type*} [DecidableEq ι]
+variable {s : Finset ι} {v : ι -> F}
+
+theorem nodal_dvd_of_eval_eq_zero (hvs : Set.InjOn v (↑s : Set ι))
+    {p : Polynomial F} (hzero : ∀ i ∈ s, p.eval (v i) = 0) :
+    _root_.Lagrange.nodal s v ∣ p := by
+  classical
+  induction s using Finset.induction_on generalizing p with
+  | empty =>
+      simp [_root_.Lagrange.nodal_empty]
+  | @insert i s hi IH =>
+      have hrooti : p.IsRoot (v i) := hzero i (by simp)
+      have hlin : Polynomial.X - Polynomial.C (v i) ∣ p := (Polynomial.dvd_iff_isRoot).2 hrooti
+      rcases hlin with ⟨q, hq⟩
+      have hs_inj : Set.InjOn v (↑s : Set ι) := by
+        intro a ha b hb hab
+        exact hvs (by simp [ha]) (by simp [hb]) hab
+      have hqzero : ∀ j ∈ s, q.eval (v j) = 0 := by
+        intro j hj
+        have hpj : p.eval (v j) = 0 := hzero j (by simp [hj])
+        have hvji : v j ≠ v i := by
+          intro hv
+          have hji : j = i := hvs (by simp [hj]) (by simp) hv
+          exact hi (hji ▸ hj)
+        have hmul : (v j - v i) * q.eval (v j) = 0 := by
+          rw [hq] at hpj
+          simpa [Polynomial.eval_mul, Polynomial.eval_sub, Polynomial.eval_X, Polynomial.eval_C] using hpj
+        exact (mul_eq_zero.mp hmul).resolve_left (sub_ne_zero.mpr hvji)
+      rcases IH hs_inj hqzero with ⟨r, hr⟩
+      refine ⟨r, ?_⟩
+      calc
+        p = (Polynomial.X - Polynomial.C (v i)) * q := hq
+        _ = (Polynomial.X - Polynomial.C (v i)) * (_root_.Lagrange.nodal s v * r) := by rw [hr]
+        _ = ((Polynomial.X - Polynomial.C (v i)) * _root_.Lagrange.nodal s v) * r := by rw [mul_assoc]
+        _ = _root_.Lagrange.nodal (insert i s) v * r := by
+              rw [(_root_.Lagrange.nodal_insert_eq_nodal (s := s) (v := v) hi).symm]
+
+end LagrangeFacts
 
 namespace EvaluationDomain
 
@@ -65,6 +107,16 @@ theorem sum_lagrangeBasis (domain : EvaluationDomain F) :
       domain.point_injOn_univ
       (by
         refine ⟨⟨0, domain.size_pos⟩, by simp⟩))
+
+theorem nodal_dvd_of_vanishes {poly : Polynomial F}
+    (hvanish : (PolynomialSpec.mathlib F).vanishesOn poly domain) :
+    Lagrange.nodal (Finset.univ : Finset (Fin domain.size)) domain.point ∣ poly := by
+  simpa [PolynomialSpec.mathlib, PolynomialSpec.vanishesOn] using
+    (LagrangeFacts.nodal_dvd_of_eval_eq_zero
+      (s := (Finset.univ : Finset (Fin domain.size)))
+      (v := domain.point)
+      domain.point_injOn_univ
+      (fun i _ => hvanish i))
 
 end EvaluationDomain
 
@@ -115,6 +167,16 @@ theorem sum_lagrangeBasis (domain : CosetEvaluationDomain F) :
       (by
         refine ⟨⟨0, domain.base.size_pos⟩, by simp⟩))
 
+theorem nodal_dvd_of_vanishes {poly : Polynomial F}
+    (hvanish : (PolynomialSpec.mathlib F).vanishesOnCoset poly domain) :
+    Lagrange.nodal (Finset.univ : Finset (Fin domain.base.size)) domain.point ∣ poly := by
+  simpa [PolynomialSpec.mathlib, PolynomialSpec.vanishesOnCoset] using
+    (LagrangeFacts.nodal_dvd_of_eval_eq_zero
+      (s := (Finset.univ : Finset (Fin domain.base.size)))
+      (v := domain.point)
+      domain.point_injOn_univ
+      (fun i _ => hvanish i))
+
 end CosetEvaluationDomain
 
 namespace ZerofierSpec
@@ -155,6 +217,26 @@ theorem degree_zerofier {F : Type*} [Field F]
       (s := (Finset.univ : Finset (Fin domain.size)))
       (v := domain.point)) using 1
   simp
+
+@[simp] theorem zerofier_eq_nodal {F : Type*} [Field F]
+    (domain : EvaluationDomain F) :
+    ((mathlib F).zerofier domain : Polynomial F) =
+      Lagrange.nodal (Finset.univ : Finset (Fin domain.size)) domain.point := by
+  rfl
+
+theorem dvd_of_vanishes {F : Type*} [Field F]
+    (domain : EvaluationDomain F) {poly : Polynomial F}
+    (hvanish : (PolynomialSpec.mathlib F).vanishesOn poly domain) :
+    let zerofier : Polynomial F := (mathlib F).zerofier domain
+    zerofier ∣ poly := by
+  dsimp [mathlib]
+  exact EvaluationDomain.nodal_dvd_of_vanishes (domain := domain) hvanish
+
+theorem vanishingDivisibility {F : Type*} [Field F] :
+    @VanishingDivisibility F inferInstance inferInstance
+      (mathlib F) (inferInstance : Dvd (Polynomial F)) := by
+  intro domain poly hvanish
+  exact dvd_of_vanishes domain hvanish
 
 end ZerofierSpec
 
@@ -197,6 +279,26 @@ theorem degree_zerofier {F : Type*} [Field F]
       (s := (Finset.univ : Finset (Fin domain.base.size)))
       (v := domain.point)) using 1
   simp
+
+@[simp] theorem zerofier_eq_nodal {F : Type*} [Field F]
+    (domain : CosetEvaluationDomain F) :
+    ((mathlib F).zerofier domain : Polynomial F) =
+      Lagrange.nodal (Finset.univ : Finset (Fin domain.base.size)) domain.point := by
+  rfl
+
+theorem dvd_of_vanishes {F : Type*} [Field F]
+    (domain : CosetEvaluationDomain F) {poly : Polynomial F}
+    (hvanish : (PolynomialSpec.mathlib F).vanishesOnCoset poly domain) :
+    let zerofier : Polynomial F := (mathlib F).zerofier domain
+    zerofier ∣ poly := by
+  dsimp [mathlib]
+  exact CosetEvaluationDomain.nodal_dvd_of_vanishes (domain := domain) hvanish
+
+theorem vanishingDivisibility {F : Type*} [Field F] :
+    @VanishingDivisibility F inferInstance inferInstance
+      (mathlib F) (inferInstance : Dvd (Polynomial F)) := by
+  intro domain poly hvanish
+  exact dvd_of_vanishes domain hvanish
 
 end CosetZerofierSpec
 

@@ -29,6 +29,13 @@ theorem combineNaturalOrderList_eq_ofFn (domain : CosetRadix2Domain F)
   simpa [combineNaturalOrderList] using
     (domain.base.combineNaturalOrderList_eq_ofFn h lower upper)
 
+theorem combineNaturalOrderList_eq_listOfTable (domain : CosetRadix2Domain F)
+    (h : 0 < domain.base.logSize) (lower upper : Fin domain.base.halfSize -> F) :
+    domain.combineNaturalOrderList lower upper =
+      Radix2Representation.listOfTable (domain.base.combineNaturalOrder h lower upper) := by
+  simpa [Radix2Representation.listOfTable] using
+    domain.combineNaturalOrderList_eq_ofFn h lower upper
+
 /--
 One natural-order radix-2 butterfly stage assembled from recursive list outputs
 on a coset domain.
@@ -101,6 +108,21 @@ theorem butterflyStageList_eq_ofFn (domain : CosetRadix2Domain F)
         (fun i => domain.point (domain.base.lowerIndex h i))
         lower upper).2)
 
+theorem butterflyStageList_eq_listOfTable (domain : CosetRadix2Domain F)
+    (h : 0 < domain.base.logSize) (lower upper : Fin domain.base.halfSize -> F) :
+    domain.butterflyStageList h
+      (List.ofFn lower) (List.ofFn upper)
+      (List.length_ofFn (f := lower)) (List.length_ofFn (f := upper)) =
+        Radix2Representation.listOfTable
+          (domain.base.combineNaturalOrder h
+            (Radix2.butterflyValues
+              (fun i => domain.point (domain.base.lowerIndex h i))
+              lower upper).1
+            (Radix2.butterflyValues
+              (fun i => domain.point (domain.base.lowerIndex h i))
+              lower upper).2) := by
+  simpa [Radix2Representation.listOfTable] using domain.butterflyStageList_eq_ofFn h lower upper
+
 /--
 List-based natural-order recursive radix-2 FFT on a coset domain, carrying its
 output length.
@@ -120,9 +142,9 @@ noncomputable def fftNaturalListAuxData :
   | Nat.succ k, domain, hk, poly =>
       let hpos : 0 < domain.base.logSize := by
         simp [hk]
-      let half := domain.halfSquareDomain hpos
+      let half := domain.succHalfSquare hk
       let hkHalf : half.base.logSize = k := by
-        simp [half, CosetRadix2Domain.halfSquareDomain, Radix2Domain.halfDomain, hk]
+        simp [half]
       let evenValues := fftNaturalListAuxData k half hkHalf (PolynomialParity.evenPart poly)
       let oddValues := fftNaturalListAuxData k half hkHalf (PolynomialParity.oddPart poly)
       ⟨domain.butterflyStageList hpos

@@ -18,9 +18,9 @@ theorem fftNaturalArrayAux_toList_eq :
   | k + 1, domain, hk, poly => by
       let hpos : 0 < domain.logSize := by
         simp [hk]
-      let half := domain.halfDomain hpos
+      let half := domain.succHalf hk
       have hkHalf : half.logSize = k := by
-        simp [half, Radix2Domain.halfDomain, hk]
+        simp [half]
       let evenData := fftNaturalArrayAuxData k half hkHalf (PolynomialParity.evenPart poly)
       let oddData := fftNaturalArrayAuxData k half hkHalf (PolynomialParity.oddPart poly)
       have heven :
@@ -60,6 +60,12 @@ theorem fftNaturalArray_eq_toArray (domain : Radix2Domain F) (poly : Polynomial 
     domain.fftNaturalArray poly = (domain.fftNaturalList poly).toArray := by
   apply Array.ext'
   simpa using domain.fftNaturalArray_toList_eq poly
+
+theorem fftNaturalArray_eq_arrayOfTable (domain : Radix2Domain F) (poly : Polynomial F) :
+    domain.fftNaturalArray poly = Radix2Representation.arrayOfTable (domain.fftNatural poly) := by
+  apply Array.ext'
+  rw [Radix2Representation.arrayOfTable_toList]
+  rw [fftNaturalArray_toList_eq, domain.fftNaturalList_eq_listOfTable]
 
 theorem fftNaturalArray_toList_eq_ofFn (domain : Radix2Domain F) (poly : Polynomial F) :
     (domain.fftNaturalArray poly).toList = List.ofFn (domain.fftNatural poly) := by

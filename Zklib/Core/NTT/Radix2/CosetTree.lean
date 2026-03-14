@@ -23,13 +23,13 @@ noncomputable def parityTreeAux :
       Radix2.FFTTree.leaf (domain.toCosetNTTSpec.transform poly (Fin.mk 0 domain.base.size_pos))
   | Nat.succ k, domain, hk, poly =>
       let hpos : 0 < domain.base.logSize := by simp [hk]
-      let evenDom := domain.halfEvenDomain hpos
-      let oddDom := domain.halfOddDomain hpos
+      let evenDom := domain.succHalfEven hk
+      let oddDom := domain.succHalfOdd hk
       Radix2.FFTTree.node
         (parityTreeAux k evenDom
-          (by simp [evenDom, CosetRadix2Domain.halfEvenDomain, Radix2Domain.halfDomain, hk]) poly)
+          (by simp [evenDom]) poly)
         (parityTreeAux k oddDom
-          (by simp [oddDom, CosetRadix2Domain.halfOddDomain, Radix2Domain.halfDomain, hk]) poly)
+          (by simp [oddDom]) poly)
 
 /--
 The recursive radix-2 parity-split decomposition tree of a coset transform.
@@ -48,10 +48,10 @@ theorem parityTreeAux_succ (k : Nat) (domain : CosetRadix2Domain F)
     (hk : domain.base.logSize = k + 1) (poly : Polynomial F) :
     parityTreeAux (k + 1) domain hk poly =
       Radix2.FFTTree.node
-        (parityTreeAux k (domain.halfEvenDomain (by simp [hk]))
-          (by simp [CosetRadix2Domain.halfEvenDomain, Radix2Domain.halfDomain, hk]) poly)
-        (parityTreeAux k (domain.halfOddDomain (by simp [hk]))
-          (by simp [CosetRadix2Domain.halfOddDomain, Radix2Domain.halfDomain, hk]) poly) := by
+        (parityTreeAux k (domain.succHalfEven hk)
+          (by simp) poly)
+        (parityTreeAux k (domain.succHalfOdd hk)
+          (by simp) poly) := by
   rfl
 
 theorem parityTreeAux_eq_map_transform_indexTreeAux :
@@ -66,12 +66,12 @@ theorem parityTreeAux_eq_map_transform_indexTreeAux :
       rfl
   | Nat.succ k, domain, hk, poly => by
       let hpos : 0 < domain.base.logSize := by simp [hk]
-      let evenDom := domain.halfEvenDomain hpos
-      let oddDom := domain.halfOddDomain hpos
+      let evenDom := domain.succHalfEven hk
+      let oddDom := domain.succHalfOdd hk
       have hkEven : evenDom.base.logSize = k := by
-        simp [evenDom, CosetRadix2Domain.halfEvenDomain, Radix2Domain.halfDomain, hk]
+        simp [evenDom]
       have hkOdd : oddDom.base.logSize = k := by
-        simp [oddDom, CosetRadix2Domain.halfOddDomain, Radix2Domain.halfDomain, hk]
+        simp [oddDom]
       have ihEven := parityTreeAux_eq_map_transform_indexTreeAux k evenDom hkEven poly
       have ihOdd := parityTreeAux_eq_map_transform_indexTreeAux k oddDom hkOdd poly
       have hparity := parityTreeAux_succ k domain hk poly

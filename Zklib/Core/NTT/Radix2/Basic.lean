@@ -180,6 +180,26 @@ def halfDomain (domain : Radix2Domain F) (h : 0 < domain.logSize) : Radix2Domain
   logSize := domain.logSize.pred
   size_eq_pow := rfl
 
+/--
+The canonical child domain used in a successor-step radix-2 recursion.
+
+Packaging the positivity proof here keeps downstream recursive proofs from
+rebuilding the same shape witnesses at every call site.
+-/
+def succHalf (domain : Radix2Domain F) {k : Nat} (hk : domain.logSize = k + 1) :
+    Radix2Domain F :=
+  domain.halfDomain (by simp [hk])
+
+@[simp] theorem succHalf_logSize (domain : Radix2Domain F) {k : Nat}
+    (hk : domain.logSize = k + 1) :
+    (domain.succHalf hk).logSize = k := by
+  simp [succHalf, Radix2Domain.halfDomain, hk]
+
+@[simp] theorem succHalf_size (domain : Radix2Domain F) {k : Nat}
+    (hk : domain.logSize = k + 1) :
+    (domain.succHalf hk).size = domain.halfSize := by
+  rfl
+
 end Radix2Domain
 
 namespace Radix2Domain

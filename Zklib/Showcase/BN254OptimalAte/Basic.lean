@@ -1,13 +1,14 @@
 namespace Zklib.Showcase
 
 /--
-North-star theorem placeholder for the eventual BN254 optimal Ate pairing
-bilinearity formalization.
+Abstract pairing bilinearity boundary for the eventual BN254 optimal Ate
+formalization.
 
-This sits in `Showcase` on purpose: it should depend on reusable infrastructure
-from `Core`, not define the repository's foundational layers itself.
+This is intentionally more honest than a full BN254 or optimal-Ate
+formalization: at the moment it records the algebraic boundary that later
+curve-specific developments should discharge.
 -/
-structure BN254OptimalAteGoal where
+structure PairingBilinearityBoundary where
   G1 : Type
   G2 : Type
   GT : Type
@@ -16,18 +17,52 @@ structure BN254OptimalAteGoal where
   mulGT : GT -> GT -> GT
   pairing : G1 -> G2 -> GT
 
-namespace BN254OptimalAteGoal
+namespace PairingBilinearityBoundary
+
+/--
+Left-linearity of the abstract pairing boundary.
+-/
+def leftBilinear (boundary : PairingBilinearityBoundary) : Prop :=
+  ∀ p₁ p₂ q,
+    boundary.pairing (boundary.addG1 p₁ p₂) q =
+      boundary.mulGT (boundary.pairing p₁ q) (boundary.pairing p₂ q)
+
+/--
+Right-linearity of the abstract pairing boundary.
+-/
+def rightBilinear (boundary : PairingBilinearityBoundary) : Prop :=
+  ∀ p q₁ q₂,
+    boundary.pairing p (boundary.addG2 q₁ q₂) =
+      boundary.mulGT (boundary.pairing p q₁) (boundary.pairing p q₂)
 
 /--
 The combined bilinearity statement tracked by the showcase goal.
 -/
-def bilinear (goal : BN254OptimalAteGoal) : Prop :=
-  (∀ p₁ p₂ q,
-      goal.pairing (goal.addG1 p₁ p₂) q =
-        goal.mulGT (goal.pairing p₁ q) (goal.pairing p₂ q)) ∧
-    ∀ p q₁ q₂,
-      goal.pairing p (goal.addG2 q₁ q₂) =
-        goal.mulGT (goal.pairing p q₁) (goal.pairing p q₂)
+def bilinear (boundary : PairingBilinearityBoundary) : Prop :=
+  boundary.leftBilinear ∧ boundary.rightBilinear
+
+theorem bilinear_iff (boundary : PairingBilinearityBoundary) :
+    boundary.bilinear ↔ boundary.leftBilinear ∧ boundary.rightBilinear := by
+  rfl
+
+end PairingBilinearityBoundary
+
+/--
+Backward-compatible alias for the old showcase name.
+-/
+abbrev BN254OptimalAteBoundary := PairingBilinearityBoundary
+
+/--
+Backward-compatible alias kept while the showcase surface is renamed to a more
+honest boundary-oriented name.
+-/
+abbrev BN254OptimalAteGoal := PairingBilinearityBoundary
+
+namespace BN254OptimalAteGoal
+
+theorem bilinear_iff (goal : BN254OptimalAteGoal) :
+    goal.bilinear ↔ goal.leftBilinear ∧ goal.rightBilinear := by
+  exact PairingBilinearityBoundary.bilinear_iff goal
 
 end BN254OptimalAteGoal
 

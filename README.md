@@ -16,7 +16,7 @@ Zklib/
     Field.lean
     ExtensionField.lean
     Polynomial.lean
-    Subgroup.lean
+    EvaluationDomain.lean
     NTT.lean
     Transcript.lean
     ConstraintSystem.lean
@@ -36,24 +36,25 @@ docs/
 
 Stable algebraic infrastructure that should outlive any single proving system:
 
-- commutative-ring skeletons, extension-algebra skeletons, and bridges back to `mathlib`
+- `mathlib` typeclass-based ring, field, and algebra foundations
 - polynomials, evaluation, and interpolation
 - cyclic evaluation domains, shifted cosets, and roots of unity
-- NTT correctness
-- transcript and constraint-system semantics with explicit sequencing and input boundaries
+- NTT semantics and radix-2 algorithmic correctness
+- transcript semantics with explicit challenge observation and sequencing laws
+- constraint-system semantics with canonical public-input recovery
 
 ### `Zklib.Instantiations`
 
 Concrete verifier-facing targets that make the repository useful to current zk ecosystems:
 
-- `EIP4844`: setup-indexed KZG verifier boundaries for Ethereum relevance
-- `ZkVM`: verification-key and statement semantics for the zkVM direction
+- `EIP4844`: setup-indexed KZG verifier boundaries with canonical claim/statement-system bridges
+- `ZkVM`: verification-key semantics with canonical statement bridges into `ConstraintSystemSpec`
 
 ### `Zklib.Showcase`
 
 High-prestige, high-difficulty endgame formalizations that demonstrate the full power of the library:
 
-- `BN254OptimalAte`: machine-checked bilinearity for the BN254 optimal Ate pairing
+- `BN254OptimalAte`: an honest pairing-bilinearity boundary today, full optimal-Ate formalization later
 
 ## Initial Goal
 
@@ -76,8 +77,8 @@ lake exe cache get
 lake build
 ```
 
-`lake exe cache get` is part of the normal setup here. We should lean on the `mathlib`
-cache instead of recompiling the world from scratch.
+`lake exe cache get` is part of the normal setup here. We should lean on the
+`mathlib` cache instead of recompiling the world from scratch.
 
 Dependency revisions are pinned through `lake-manifest.json`. Use `lake update`
 only when intentionally refreshing those pins and committing the manifest

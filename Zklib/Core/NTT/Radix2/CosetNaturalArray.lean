@@ -22,6 +22,14 @@ theorem toList_combineNaturalOrderArray (domain : CosetRadix2Domain F)
       domain.combineNaturalOrderList lower upper := by
   simp [combineNaturalOrderArray, combineNaturalOrderList]
 
+theorem combineNaturalOrderArray_eq_arrayOfTable (domain : CosetRadix2Domain F)
+    (h : 0 < domain.base.logSize) (lower upper : Fin domain.base.halfSize -> F) :
+    domain.combineNaturalOrderArray lower upper =
+      Radix2Representation.arrayOfTable (domain.base.combineNaturalOrder h lower upper) := by
+  apply Array.ext'
+  rw [Radix2Representation.arrayOfTable_toList, domain.toList_combineNaturalOrderArray]
+  exact domain.combineNaturalOrderList_eq_listOfTable h lower upper
+
 @[simp]
 theorem size_combineNaturalOrderArray (domain : CosetRadix2Domain F)
     (h : 0 < domain.base.logSize) (lower upper : Fin domain.base.halfSize -> F) :
@@ -52,8 +60,35 @@ theorem toList_butterflyStageArray (domain : CosetRadix2Domain F) (h : 0 < domai
       domain.butterflyStageList h lower.toList upper.toList
         (by rw [Array.length_toList]; exact hl)
         (by rw [Array.length_toList]; exact hu) := by
-  dsimp [butterflyStageArray, butterflyStageList, Radix2Domain.tableOfArray]
+  have hLowerTable :
+      Radix2Domain.tableOfArray lower hl =
+        Radix2Domain.tableOfList lower.toList (by rw [Array.length_toList]; exact hl) := by
+    exact Radix2Representation.tableOfArray_eq_tableOfList_toList (values := lower) (h := hl)
+  have hUpperTable :
+      Radix2Domain.tableOfArray upper hu =
+        Radix2Domain.tableOfList upper.toList (by rw [Array.length_toList]; exact hu) := by
+    exact Radix2Representation.tableOfArray_eq_tableOfList_toList (values := upper) (h := hu)
+  dsimp [butterflyStageArray, butterflyStageList]
+  rw [hLowerTable, hUpperTable]
   simp [combineNaturalOrderArray, combineNaturalOrderList]
+
+theorem butterflyStageArray_eq_arrayOfTable (domain : CosetRadix2Domain F)
+    (h : 0 < domain.base.logSize) (lower upper : Fin domain.base.halfSize -> F) :
+    domain.butterflyStageArray h
+      (Array.ofFn lower) (Array.ofFn upper)
+      (by simp) (by simp) =
+        Radix2Representation.arrayOfTable
+          (domain.base.combineNaturalOrder h
+            (Radix2.butterflyValues
+              (fun i => domain.point (domain.base.lowerIndex h i))
+              lower upper).1
+            (Radix2.butterflyValues
+              (fun i => domain.point (domain.base.lowerIndex h i))
+              lower upper).2) := by
+  apply Array.ext'
+  rw [Radix2Representation.arrayOfTable_toList, domain.toList_butterflyStageArray]
+  simpa [Radix2Representation.listOfTable] using
+    domain.butterflyStageList_eq_listOfTable h lower upper
 
 @[simp]
 theorem size_butterflyStageArray (domain : CosetRadix2Domain F) (h : 0 < domain.base.logSize)
@@ -84,9 +119,9 @@ noncomputable def fftNaturalArrayAuxData :
   | Nat.succ k, domain, hk, poly =>
       let hpos : 0 < domain.base.logSize := by
         simp [hk]
-      let half := domain.halfSquareDomain hpos
+      let half := domain.succHalfSquare hk
       let hkHalf : half.base.logSize = k := by
-        simp [half, CosetRadix2Domain.halfSquareDomain, Radix2Domain.halfDomain, hk]
+        simp [half]
       let evenValues := fftNaturalArrayAuxData k half hkHalf (PolynomialParity.evenPart poly)
       let oddValues := fftNaturalArrayAuxData k half hkHalf (PolynomialParity.oddPart poly)
       ⟨domain.butterflyStageArray hpos

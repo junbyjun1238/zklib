@@ -14,28 +14,27 @@ Formalize reusable zk mathematics in Lean, then use that core to verify producti
 
 ### M1: algebraic core
 
-- commutative-ring skeletons and derived law lemmas
-- extension-algebra skeletons, bridges to `mathlib`, and later towers
+- `mathlib` typeclass-driven commutative rings, fields, and extension towers
 - polynomial representation and evaluation
 - cyclic evaluation-domain, coset, and root-of-unity lemmas
-- NTT statement layer
+- NTT semantic layer and radix-2 algorithmic refinements
 
 ### M2: verifier semantics
 
-- typed transcript interface with explicit serialization boundaries
-- constraint-system semantics with explicit public-input boundaries
+- typed transcript interface with explicit serialization and challenge-state boundaries
+- constraint-system semantics with canonical public-input boundaries
 - verifier-oriented statement definitions
 
 ### M3: Ethereum-facing instantiation
 
 - EIP-4844 statement layer
-- setup-indexed KZG verifier specification boundaries
+- setup-indexed KZG verifier specification boundaries with generic statement-system bridges
 - clear separation between generic polynomial facts and commitment-specific assumptions
 
 ### M4: zkVM-facing instantiation
 
 - FRI-oriented statement layer
-- verification-key and statement-validity boundaries
+- verification-key and statement-validity boundaries with `ConstraintSystemSpec` integration
 - Merkle/transcript integration points
 - receipt-verifier style decomposition
 
@@ -44,7 +43,8 @@ Formalize reusable zk mathematics in Lean, then use that core to verify producti
 - BN254 field tower
 - curve and twist setup
 - Miller loop and final exponentiation lemmas
-- bilinearity statement for optimal Ate pairing
+- today: an abstract pairing-bilinearity boundary
+- later: the full bilinearity statement for optimal Ate pairing
 
 ## Contribution Shape
 

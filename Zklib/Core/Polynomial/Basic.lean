@@ -1,4 +1,4 @@
-import Zklib.Core.Subgroup.Basic
+import Zklib.Core.EvaluationDomain.Basic
 
 namespace Zklib.Core
 

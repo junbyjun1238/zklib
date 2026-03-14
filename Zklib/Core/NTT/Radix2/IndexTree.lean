@@ -22,11 +22,12 @@ noncomputable def indexTreeAux :
       Radix2.FFTTree.leaf (Fin.mk 0 domain.size_pos)
   | Nat.succ k, domain, hk =>
       let hpos : 0 < domain.logSize := by simp [hk]
+      let half := domain.succHalf hk
       Radix2.FFTTree.node
         (Radix2.FFTTree.map (domain.evenIndex hpos)
-          (indexTreeAux k (domain.halfDomain hpos) (by simp [Radix2Domain.halfDomain, hk])))
+          (indexTreeAux k half (by simp [half])))
         (Radix2.FFTTree.map (domain.oddIndex hpos)
-          (indexTreeAux k (domain.halfDomain hpos) (by simp [Radix2Domain.halfDomain, hk])))
+          (indexTreeAux k half (by simp [half])))
 
 /--
 The canonical parity-order recursion tree of evaluation indices for a radix-2
@@ -44,11 +45,11 @@ theorem indexTreeAux_succ (k : Nat) (domain : Radix2Domain F)
     indexTreeAux (k + 1) domain hk =
       Radix2.FFTTree.node
         (Radix2.FFTTree.map (domain.evenIndex (by simp [hk]))
-          (indexTreeAux k (domain.halfDomain (by simp [hk]))
-            (by simp [Radix2Domain.halfDomain, hk])))
+          (indexTreeAux k (domain.succHalf hk)
+            (by simp)))
         (Radix2.FFTTree.map (domain.oddIndex (by simp [hk]))
-          (indexTreeAux k (domain.halfDomain (by simp [hk]))
-            (by simp [Radix2Domain.halfDomain, hk]))) := by
+          (indexTreeAux k (domain.succHalf hk)
+            (by simp))) := by
   rfl
 
 theorem leafCount_indexTreeAux :
@@ -62,22 +63,22 @@ theorem leafCount_indexTreeAux :
       simp [indexTreeAux, hsize, Radix2.FFTTree.leafCount]
   | Nat.succ k, domain, hk => by
       let hpos : 0 < domain.logSize := by simp [hk]
-      have hkHalf : (domain.halfDomain hpos).logSize = k := by
-        simp [Radix2Domain.halfDomain, hk]
-      have ihHalf : (indexTreeAux k (domain.halfDomain hpos) hkHalf).leafCount =
-          (domain.halfDomain hpos).size :=
-        leafCount_indexTreeAux k (domain.halfDomain hpos) hkHalf
+      let half := domain.succHalf hk
+      have hkHalf : half.logSize = k := by
+        simp [half]
+      have ihHalf : (indexTreeAux k half hkHalf).leafCount = half.size :=
+        leafCount_indexTreeAux k half hkHalf
       have hstep :
           (indexTreeAux (k + 1) domain hk).leafCount =
-            (indexTreeAux k (domain.halfDomain hpos) hkHalf).leafCount
-              + (indexTreeAux k (domain.halfDomain hpos) hkHalf).leafCount := by
+            (indexTreeAux k half hkHalf).leafCount
+              + (indexTreeAux k half hkHalf).leafCount := by
         simpa [hkHalf, Radix2.FFTTree.leafCount, Radix2.FFTTree.leafCount_map] using
           congrArg Radix2.FFTTree.leafCount (indexTreeAux_succ k domain hk)
       calc
         (indexTreeAux (k + 1) domain hk).leafCount
-            = (indexTreeAux k (domain.halfDomain hpos) hkHalf).leafCount
-              + (indexTreeAux k (domain.halfDomain hpos) hkHalf).leafCount := hstep
-        _ = (domain.halfDomain hpos).size + (domain.halfDomain hpos).size := by
+            = (indexTreeAux k half hkHalf).leafCount
+              + (indexTreeAux k half hkHalf).leafCount := hstep
+        _ = half.size + half.size := by
               simp [ihHalf]
         _ = domain.size := by
               simpa using (domain.size_eq_halfSize_add_halfSize hpos).symm
@@ -98,9 +99,9 @@ theorem parityTreeAux_eq_map_transform_indexTreeAux :
       rfl
   | Nat.succ k, domain, hk, poly => by
       let hpos : 0 < domain.logSize := by simp [hk]
-      let half := domain.halfDomain hpos
+      let half := domain.succHalf hk
       have hkHalf : half.logSize = k := by
-        simp [half, Radix2Domain.halfDomain, hk]
+        simp [half]
       have ihEven := parityTreeAux_eq_map_transform_indexTreeAux k half hkHalf poly
       have ihOdd := parityTreeAux_eq_map_transform_indexTreeAux k half hkHalf
         (domain.twistPolynomial poly)
@@ -110,7 +111,8 @@ theorem parityTreeAux_eq_map_transform_indexTreeAux :
           (fun i => domain.toNTTSpec.transform poly (domain.evenIndex hpos i)) =
             half.toNTTSpec.transform poly := by
         funext i
-        change poly.eval (domain.point (domain.evenIndex hpos i)) = poly.eval (half.point i)
+        change poly.eval (domain.point (domain.evenIndex hpos i)) =
+          poly.eval ((domain.halfDomain hpos).point i)
         rw [halfDomain_point_eq_evenPoint]
       have hright :
           (fun i => domain.toNTTSpec.transform poly (domain.oddIndex hpos i)) =

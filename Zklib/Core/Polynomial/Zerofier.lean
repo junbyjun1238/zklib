@@ -30,6 +30,15 @@ namespace ZerofierSpec
 
 variable {F : Type u} [Monoid F] [Zero F]
 
+/--
+The distinguished zerofier controls vanishing polynomials on every evaluation
+domain by divisibility.
+-/
+def VanishingDivisibility (spec : ZerofierSpec F)
+    [Dvd spec.toPolynomialSpec.Carrier] : Prop :=
+  ∀ (domain : EvaluationDomain F) {poly : spec.toPolynomialSpec.Carrier},
+    spec.toPolynomialSpec.vanishesOn poly domain -> spec.zerofier domain ∣ poly
+
 theorem zerofier_eval_eq_zero (spec : ZerofierSpec F) (domain : EvaluationDomain F)
     (i : Fin domain.size) :
     spec.toPolynomialSpec.eval (spec.zerofier domain) (domain.point i) = 0 := by
@@ -47,6 +56,15 @@ end ZerofierSpec
 namespace CosetZerofierSpec
 
 variable {F : Type u} [Monoid F] [Zero F]
+
+/--
+The distinguished coset zerofier controls vanishing polynomials on every
+shifted coset domain by divisibility.
+-/
+def VanishingDivisibility (spec : CosetZerofierSpec F)
+    [Dvd spec.toPolynomialSpec.Carrier] : Prop :=
+  ∀ (domain : CosetEvaluationDomain F) {poly : spec.toPolynomialSpec.Carrier},
+    spec.toPolynomialSpec.vanishesOnCoset poly domain -> spec.zerofier domain ∣ poly
 
 theorem zerofier_eval_eq_zero (spec : CosetZerofierSpec F) (domain : CosetEvaluationDomain F)
     (i : Fin domain.base.size) :

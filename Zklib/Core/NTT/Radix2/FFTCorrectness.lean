@@ -16,11 +16,9 @@ theorem fftAux_eq_parityTreeAux_flatten :
   | 0, domain, hk, poly => by
       rfl
   | k + 1, domain, hk, poly => by
-      let hpos : 0 < domain.logSize := by
-        simp [hk]
-      let half := domain.halfDomain hpos
+      let half := domain.succHalf hk
       have hkHalf : half.logSize = k := by
-        simp [half, Radix2Domain.halfDomain, hk]
+        simp [half]
       have htree :
           (parityTreeAux (k + 1) domain hk poly).flatten =
             (parityTreeAux k half hkHalf poly).flatten ++

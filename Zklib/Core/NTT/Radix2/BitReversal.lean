@@ -271,11 +271,11 @@ theorem indexTreeAux_flatten_eq_map_bitRevOrderAux :
   | k + 1, domain, hk => by
       let hpos : 0 < domain.logSize := by
         simp [hk]
-      let half := domain.halfDomain hpos
+      let half := domain.succHalf hk
       have hkHalf : half.logSize = k := by
-        simp [half, Radix2Domain.halfDomain, hk]
+        simp [half]
       have hhalfSize : 2 ^ k = half.size := by
-        simpa [half, Radix2Domain.halfDomain, hk] using half.size_eq_pow.symm
+        simpa [half] using half.size_eq_pow.symm
       have hpow : 2 ^ k + 2 ^ k = 2 ^ (k + 1) := by
         simp [pow_succ, Nat.mul_comm, Nat.two_mul]
       have hdom : 2 ^ (k + 1) = domain.size := by

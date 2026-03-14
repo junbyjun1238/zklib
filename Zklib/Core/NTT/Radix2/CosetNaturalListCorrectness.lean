@@ -33,9 +33,9 @@ theorem fftNaturalListAux_eq_ofFn :
   | k + 1, domain, hk, poly => by
       let hpos : 0 < domain.base.logSize := by
         simp [hk]
-      let half := domain.halfSquareDomain hpos
+      let half := domain.succHalfSquare hk
       have hkHalf : half.base.logSize = k := by
-        simp [half, CosetRadix2Domain.halfSquareDomain, Radix2Domain.halfDomain, hk]
+        simp [half]
       have heven :
           (fftNaturalListAuxData k half hkHalf (PolynomialParity.evenPart poly)).1 =
             List.ofFn (fftNaturalAux k half hkHalf (PolynomialParity.evenPart poly)) := by
@@ -57,6 +57,10 @@ theorem fftNaturalList_eq_ofFn (domain : CosetRadix2Domain F) (poly : Polynomial
     domain.fftNaturalList poly = List.ofFn (domain.fftNatural poly) := by
   simpa [fftNaturalList, fftNatural] using
     fftNaturalListAux_eq_ofFn domain.base.logSize domain rfl poly
+
+theorem fftNaturalList_eq_listOfTable (domain : CosetRadix2Domain F) (poly : Polynomial F) :
+    domain.fftNaturalList poly = Radix2Representation.listOfTable (domain.fftNatural poly) := by
+  simpa [Radix2Representation.listOfTable] using domain.fftNaturalList_eq_ofFn poly
 
 theorem fftNaturalList_eq_ofFn_transform (domain : CosetRadix2Domain F) (poly : Polynomial F) :
     domain.fftNaturalList poly = List.ofFn (domain.toCosetNTTSpec.transform poly) := by

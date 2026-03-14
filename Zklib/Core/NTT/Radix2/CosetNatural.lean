@@ -25,9 +25,9 @@ noncomputable def fftNaturalAux :
   | Nat.succ k, domain, hk, poly =>
       let hpos : 0 < domain.base.logSize := by
         simp [hk]
-      let half := domain.halfSquareDomain hpos
+      let half := domain.succHalfSquare hk
       let hkHalf : half.base.logSize = k := by
-        simp [half, CosetRadix2Domain.halfSquareDomain, Radix2Domain.halfDomain, hk]
+        simp [half]
       let evenVals := fftNaturalAux k half hkHalf (PolynomialParity.evenPart poly)
       let oddVals := fftNaturalAux k half hkHalf (PolynomialParity.oddPart poly)
       let stage := Radix2.butterflyValues
@@ -48,13 +48,13 @@ theorem fftNaturalAux_zero (domain : CosetRadix2Domain F) (hk : domain.base.logS
     fftNaturalAux 0 domain hk poly = domain.toCosetNTTSpec.transform poly := by
   rfl
 
-theorem fftNaturalAux_succ (k : Nat) (domain : CosetRadix2Domain F)
+  theorem fftNaturalAux_succ (k : Nat) (domain : CosetRadix2Domain F)
     (hk : domain.base.logSize = k + 1) (poly : Polynomial F) :
     fftNaturalAux (k + 1) domain hk poly =
       let hpos : 0 < domain.base.logSize := by simp [hk]
-      let half := domain.halfSquareDomain hpos
+      let half := domain.succHalfSquare hk
       let hkHalf : half.base.logSize = k := by
-        simp [half, CosetRadix2Domain.halfSquareDomain, Radix2Domain.halfDomain, hk]
+        simp [half]
       let evenVals := fftNaturalAux k half hkHalf (PolynomialParity.evenPart poly)
       let oddVals := fftNaturalAux k half hkHalf (PolynomialParity.oddPart poly)
       let stage := Radix2.butterflyValues
@@ -74,9 +74,9 @@ theorem fftNaturalAux_eq_transform :
   | k + 1, domain, hk, poly => by
       let hpos : 0 < domain.base.logSize := by
         simp [hk]
-      let half := domain.halfSquareDomain hpos
+      let half := domain.succHalfSquare hk
       have hkHalf : half.base.logSize = k := by
-        simp [half, CosetRadix2Domain.halfSquareDomain, Radix2Domain.halfDomain, hk]
+        simp [half]
       let stage :=
         Radix2.butterflyValues
           (fun i => domain.point (domain.base.lowerIndex hpos i))
@@ -91,10 +91,8 @@ theorem fftNaturalAux_eq_transform :
                   (domain.base.naturalOrderPair_combineNaturalOrder hpos stage.1 stage.2)
         _ = Radix2.butterflyValues
               (fun i => domain.point (domain.base.lowerIndex hpos i))
-              ((domain.halfSquareDomain hpos).toCosetNTTSpec.transform
-                (PolynomialParity.evenPart poly))
-              ((domain.halfSquareDomain hpos).toCosetNTTSpec.transform
-                (PolynomialParity.oddPart poly)) := by
+              (half.toCosetNTTSpec.transform (PolynomialParity.evenPart poly))
+              (half.toCosetNTTSpec.transform (PolynomialParity.oddPart poly)) := by
                 dsimp [stage]
                 rw [fftNaturalAux_eq_transform k half hkHalf (PolynomialParity.evenPart poly),
                   fftNaturalAux_eq_transform k half hkHalf (PolynomialParity.oddPart poly)]

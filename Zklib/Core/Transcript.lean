@@ -16,12 +16,20 @@ structure TranscriptSpec where
   Challenge : Type v
   Message : Type w
   encode : Message -> ByteArray
+  encodeChallenge : Challenge -> ByteArray
   absorbBytes : State -> ByteArray -> State
+  observeChallenge : State -> Challenge -> State
   squeeze : State -> Prod Challenge State
   absorbBytes_empty : ∀ state, absorbBytes state ByteArray.empty = state
   absorbBytes_append :
     ∀ state bytes₁ bytes₂,
       absorbBytes (absorbBytes state bytes₁) bytes₂ = absorbBytes state (bytes₁ ++ bytes₂)
+  observeChallenge_eq_absorbBytes :
+    ∀ state challenge,
+      observeChallenge state challenge = absorbBytes state (encodeChallenge challenge)
+  squeeze_updates_state :
+    ∀ state,
+      (squeeze state).2 = observeChallenge state (squeeze state).1
 
 namespace TranscriptSpec
 
@@ -31,6 +39,13 @@ Absorb a typed message after explicit serialization.
 def absorb (spec : TranscriptSpec) (state : TranscriptSpec.State spec)
     (message : TranscriptSpec.Message spec) : TranscriptSpec.State spec :=
   spec.absorbBytes state (spec.encode message)
+
+/--
+Record an already-generated challenge in the transcript state.
+-/
+def absorbChallenge (spec : TranscriptSpec) (state : TranscriptSpec.State spec)
+    (challenge : TranscriptSpec.Challenge spec) : TranscriptSpec.State spec :=
+  spec.observeChallenge state challenge
 
 /--
 Absorb a sequence of already-serialized byte chunks.
@@ -45,6 +60,18 @@ Absorb a sequence of typed messages.
 def absorbMany (spec : TranscriptSpec) (state : TranscriptSpec.State spec)
     (messages : List (TranscriptSpec.Message spec)) : TranscriptSpec.State spec :=
   spec.absorbManyBytes state (messages.map spec.encode)
+
+/--
+Repeatedly squeeze challenges, threading the post-squeeze state.
+-/
+def squeezeMany (spec : TranscriptSpec) (state : TranscriptSpec.State spec)
+    (count : Nat) : List (TranscriptSpec.Challenge spec) × TranscriptSpec.State spec :=
+  match count with
+  | 0 => ([], state)
+  | n + 1 =>
+      let (challenge, state') := spec.squeeze state
+      let (challenges, state'') := spec.squeezeMany state' n
+      (challenge :: challenges, state'')
 
 theorem absorbManyBytes_nil (spec : TranscriptSpec) (state : TranscriptSpec.State spec) :
     spec.absorbManyBytes state [] = state := by
@@ -64,6 +91,34 @@ theorem absorbBytes_two_eq_absorbManyBytes (spec : TranscriptSpec)
 theorem absorb_eq_absorbMany_singleton (spec : TranscriptSpec)
     (state : TranscriptSpec.State spec) (message : TranscriptSpec.Message spec) :
     spec.absorb state message = spec.absorbMany state [message] := by
+  rfl
+
+theorem absorbChallenge_eq_absorbBytes (spec : TranscriptSpec)
+    (state : TranscriptSpec.State spec) (challenge : TranscriptSpec.Challenge spec) :
+    spec.absorbChallenge state challenge =
+      spec.absorbBytes state (spec.encodeChallenge challenge) := by
+  exact spec.observeChallenge_eq_absorbBytes state challenge
+
+theorem squeeze_state_eq_absorbChallenge (spec : TranscriptSpec)
+    (state : TranscriptSpec.State spec) :
+    (spec.squeeze state).2 = spec.absorbChallenge state (spec.squeeze state).1 := by
+  exact spec.squeeze_updates_state state
+
+theorem squeeze_state_eq_absorbChallengeBytes (spec : TranscriptSpec)
+    (state : TranscriptSpec.State spec) :
+    (spec.squeeze state).2 =
+      spec.absorbBytes state (spec.encodeChallenge (spec.squeeze state).1) := by
+  rw [spec.squeeze_state_eq_absorbChallenge, spec.absorbChallenge_eq_absorbBytes]
+
+theorem squeezeMany_zero (spec : TranscriptSpec) (state : TranscriptSpec.State spec) :
+    spec.squeezeMany state 0 = ([], state) := by
+  rfl
+
+theorem squeezeMany_succ (spec : TranscriptSpec) (state : TranscriptSpec.State spec) (n : Nat) :
+    spec.squeezeMany state (n + 1) =
+      let (challenge, state') := spec.squeeze state
+      let (challenges, state'') := spec.squeezeMany state' n
+      (challenge :: challenges, state'') := by
   rfl
 
 end TranscriptSpec

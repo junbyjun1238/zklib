@@ -107,6 +107,30 @@ theorem point_oddIndex_eq (domain : CosetRadix2Domain F) (h : 0 < domain.base.lo
     (domain.shift * domain.base.generator) * ((domain.base.generator ^ 2) ^ (i : Nat))
   simp [mul_assoc, mul_comm]
 
+/--
+The canonical even child used in a successor-step parity recursion.
+-/
+def succHalfEven (domain : CosetRadix2Domain F) {k : Nat}
+    (hk : domain.base.logSize = k + 1) : CosetRadix2Domain F :=
+  domain.halfEvenDomain (by simp [hk])
+
+/--
+The canonical odd child used in a successor-step parity recursion.
+-/
+def succHalfOdd (domain : CosetRadix2Domain F) {k : Nat}
+    (hk : domain.base.logSize = k + 1) : CosetRadix2Domain F :=
+  domain.halfOddDomain (by simp [hk])
+
+@[simp] theorem succHalfEven_logSize (domain : CosetRadix2Domain F) {k : Nat}
+    (hk : domain.base.logSize = k + 1) :
+    (domain.succHalfEven hk).base.logSize = k := by
+  simp [succHalfEven, CosetRadix2Domain.halfEvenDomain, Radix2Domain.halfDomain, hk]
+
+@[simp] theorem succHalfOdd_logSize (domain : CosetRadix2Domain F) {k : Nat}
+    (hk : domain.base.logSize = k + 1) :
+    (domain.succHalfOdd hk).base.logSize = k := by
+  simp [succHalfOdd, CosetRadix2Domain.halfOddDomain, Radix2Domain.halfDomain, hk]
+
 end CosetRadix2Domain
 
 namespace CosetRadix2Domain
